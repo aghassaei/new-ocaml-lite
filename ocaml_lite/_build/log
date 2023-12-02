@@ -4,7 +4,7 @@
 # Workspace root:
 # /Users/aghassaei/Documents/academics/2023/csci384/new-ocaml-lite/ocaml_lite
 # Auto-detected concurrency: 8
-$ /Users/aghassaei/.opam/default/bin/ocamlc.opt -config > /var/folders/wf/k5mwhm8d6ld0ld4ccl14_rk00000gn/T/dune_089057_output
+$ /Users/aghassaei/.opam/default/bin/ocamlc.opt -config > /var/folders/wf/k5mwhm8d6ld0ld4ccl14_rk00000gn/T/dune_a3bca6_output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -101,19 +101,10 @@ $ /Users/aghassaei/.opam/default/bin/ocamlc.opt -config > /var/folders/wf/k5mwhm
 #      }
 #  ; instrument_with = []
 #  }
-$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamldep.opt -modules -impl lib/ast.ml) > _build/default/lib/.ocaml_lite.objs/ocaml_lite__Ast.impl.d
-$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -bin-annot -I lib/.ocaml_lite.objs/byte -no-alias-deps -opaque -open Ocaml_lite -o lib/.ocaml_lite.objs/byte/ocaml_lite__Ast.cmo -c -impl lib/ast.ml)
-$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -a -o lib/ocaml_lite.cma lib/.ocaml_lite.objs/byte/ocaml_lite.cmo lib/.ocaml_lite.objs/byte/ocaml_lite__Typechecker.cmo lib/.ocaml_lite.objs/byte/ocaml_lite__Parser.cmo lib/.ocaml_lite.objs/byte/ocaml_lite__Lexer.cmo lib/.ocaml_lite.objs/byte/ocaml_lite__Interpreter.cmo lib/.ocaml_lite.objs/byte/ocaml_lite__Ast.cmo)
-$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -bin-annot -I bin/.main.eobjs/byte -I lib/.ocaml_lite.objs/byte -no-alias-deps -opaque -o bin/.main.eobjs/byte/dune__exe__Main.cmi -c -intf bin/main.mli)
-$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -bin-annot -I test/.ocaml_lite_test.eobjs/byte -I /Users/aghassaei/.opam/default/lib/ocaml/unix -I /Users/aghassaei/.opam/default/lib/ounit2 -I /Users/aghassaei/.opam/default/lib/ounit2/advanced -I /Users/aghassaei/.opam/default/lib/seq -I /Users/aghassaei/.opam/default/lib/stdlib-shims -I lib/.ocaml_lite.objs/byte -no-alias-deps -opaque -open Dune__exe -o test/.ocaml_lite_test.eobjs/byte/dune__exe__Ocaml_lite_test.cmi -c -intf test/ocaml_lite_test.mli)
-$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -I lib/.ocaml_lite.objs/byte -I lib/.ocaml_lite.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Ocaml_lite -o lib/.ocaml_lite.objs/native/ocaml_lite__Ast.cmx -c -impl lib/ast.ml)
-$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -I test/.ocaml_lite_test.eobjs/byte -I test/.ocaml_lite_test.eobjs/native -I /Users/aghassaei/.opam/default/lib/ocaml/unix -I /Users/aghassaei/.opam/default/lib/ounit2 -I /Users/aghassaei/.opam/default/lib/ounit2/advanced -I /Users/aghassaei/.opam/default/lib/seq -I /Users/aghassaei/.opam/default/lib/stdlib-shims -I lib/.ocaml_lite.objs/byte -I lib/.ocaml_lite.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o test/.ocaml_lite_test.eobjs/native/dune__exe__Ocaml_lite_test.cmx -c -impl test/ocaml_lite_test.ml)
-> File "test/ocaml_lite_test.ml", line 1, characters 0-11:
-> 1 | open OUnit2
->     ^^^^^^^^^^^
-> Warning 33 [unused-open]: unused open OUnit2.
-$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -I bin/.main.eobjs/byte -I bin/.main.eobjs/native -I lib/.ocaml_lite.objs/byte -I lib/.ocaml_lite.objs/native -intf-suffix .ml -no-alias-deps -opaque -o bin/.main.eobjs/native/dune__exe__Main.cmx -c -impl bin/main.ml)
-$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -a -o lib/ocaml_lite.cmxa lib/.ocaml_lite.objs/native/ocaml_lite.cmx lib/.ocaml_lite.objs/native/ocaml_lite__Typechecker.cmx lib/.ocaml_lite.objs/native/ocaml_lite__Parser.cmx lib/.ocaml_lite.objs/native/ocaml_lite__Lexer.cmx lib/.ocaml_lite.objs/native/ocaml_lite__Interpreter.cmx lib/.ocaml_lite.objs/native/ocaml_lite__Ast.cmx)
-$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -shared -linkall -I lib -o lib/ocaml_lite.cmxs lib/ocaml_lite.cmxa)
-$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -o bin/main.exe lib/ocaml_lite.cmxa bin/.main.eobjs/native/dune__exe__Main.cmx)
-$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -o test/ocaml_lite_test.exe lib/ocaml_lite.cmxa /Users/aghassaei/.opam/default/lib/ocaml/unix/unix.cmxa /Users/aghassaei/.opam/default/lib/stdlib-shims/stdlib_shims.cmxa /Users/aghassaei/.opam/default/lib/ounit2/advanced/oUnitAdvanced.cmxa /Users/aghassaei/.opam/default/lib/ounit2/oUnit.cmxa test/.ocaml_lite_test.eobjs/native/dune__exe.cmx test/.ocaml_lite_test.eobjs/native/dune__exe__Ocaml_lite_test.cmx)
+$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamldep.opt -modules -impl lib/parser.ml) > _build/default/lib/.ocaml_lite.objs/ocaml_lite__Parser.impl.d
+$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -bin-annot -I lib/.ocaml_lite.objs/byte -no-alias-deps -opaque -open Ocaml_lite -o lib/.ocaml_lite.objs/byte/ocaml_lite__Parser.cmo -c -impl lib/parser.ml)
+> File "lib/parser.ml", line 28, characters 17-33:
+> 28 |   let (ps, r2) = parse_param_list r in            (* parse list of params *)
+>                       ^^^^^^^^^^^^^^^^
+> Error: Unbound value parse_param_list
+[2]
