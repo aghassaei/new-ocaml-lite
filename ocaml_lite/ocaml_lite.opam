@@ -6,6 +6,8 @@ license: "BSD3"
 depends: [
   "ocaml"
   "dune" {>= "3.8"}
+  "menhir"
+  "nice_parser"
   "odoc" {with-doc}
 ]
 build: [

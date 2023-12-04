@@ -1,5 +1,5 @@
 {
-
+open Menhir_parser
 (*
 
 NOTE: If you decide to use a parser generator then you should remove this token
@@ -10,7 +10,9 @@ the ones provided here, or else change the code below to match the new names.
 
 *)
 
-type token =
+
+
+(* type token =
   | Type             (** type - keyword *)
   | Of               (** of - keyword *)
   | Let              (** let - keyword *)
@@ -51,7 +53,7 @@ type token =
   | Id of string     (** Identifier, like a variable or function name *)
   | Int of int       (** Integer literal *)
   | String of string (** String literal *)
-  | EOF              (** End-of-file - you can ignore this *)
+  | EOF              * End-of-file - you can ignore this *)
 
 let tok_to_str (t : token) : string =
   match t with
@@ -101,7 +103,8 @@ let tok_to_str (t : token) : string =
 let sb = Buffer.create 256
 
 (** A new kind of error to be thrown when lexing fails. *)
-exception SyntaxError of string
+(* exception SyntaxError of string *)
+exception LexError of string
 
 }
 
@@ -112,9 +115,11 @@ let id = ['_' 'a'-'z' 'A'-'Z'] ['_' 'a'-'z' 'A'-'Z' '0'-'9']*
 let whitespace = [' ' '\t' '\r' '\n']+
 let int = ['0'-'9']+
 
-rule tok = parse
+
+(* used to be tok, not next_token *)
+rule next_token = parse
 | whitespace
-    { tok lexbuf }
+    { next_token lexbuf }
 | int as i
     { Int (int_of_string i) }
 | "type"
@@ -202,7 +207,7 @@ rule tok = parse
 | eof
     { EOF }
 | _
-    { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
+    { raise (LexError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
 and string = parse
 | '"'
     { () }
@@ -211,16 +216,16 @@ and string = parse
       string lexbuf }
 and comment = parse
 | "*)"
-    { tok lexbuf }
+    { next_token lexbuf }
 | _
     { comment lexbuf }
 
-{
+(* {
 let tokenize (s : string) : token list =
   let buf = Lexing.from_string s in
   let rec helper acc =
-    match tok buf with
+    match next_token buf with
     | EOF -> List.rev acc
     | t -> helper (t :: acc) in
   helper []
-}
+} *)

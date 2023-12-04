@@ -1,9 +1,13 @@
 (* AST *)
+(* TypeDefBind to TypeBind *)
 
 type binding = 
   | NonRecursiveBind of string * param list * typ option * expr
   | RecursiveBind of string * param list * typ option * expr
-  | TypeDefBind of string * (string * typ option) list
+  | TypeBind of string * typebind_constructor list
+
+and typebind_constructor = 
+  | TypeBindConstructor of string * typ option
 
 and expr = 
   | LetRecInExpr of string * param list * typ option * expr * expr
@@ -21,7 +25,9 @@ and expr =
   | IdLit of string 
   | UnitLit
 
-and param = string * typ option 
+and param = 
+  | NonAnnotatedParam of string
+  | AnnotatedParam of string * typ 
 
 and typ = 
   | BoolTy

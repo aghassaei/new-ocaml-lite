@@ -9,8 +9,14 @@ module Interpreter = Ocaml_lite__Interpreter
 (** @canonical Ocaml_lite.Lexer *)
 module Lexer = Ocaml_lite__Lexer
 
+(** @canonical Ocaml_lite.Menhir_parser *)
+module Menhir_parser = Ocaml_lite__Menhir_parser
+
 (** @canonical Ocaml_lite.Parser *)
 module Parser = Ocaml_lite__Parser
+
+(** @canonical Ocaml_lite.Parser_backup *)
+module Parser_backup = Ocaml_lite__Parser_backup
 
 (** @canonical Ocaml_lite.Typechecker *)
 module Typechecker = Ocaml_lite__Typechecker

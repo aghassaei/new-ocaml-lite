@@ -1,4 +1,7 @@
 (library
+ (libraries nice_parser)
  (name ocaml_lite))
 
 (ocamllex lexer)
+(menhir
+ (modules menhir_parser))

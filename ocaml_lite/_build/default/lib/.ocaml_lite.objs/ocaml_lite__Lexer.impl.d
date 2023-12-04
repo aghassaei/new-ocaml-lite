@@ -1,1 +1,1 @@
-lib/lexer.ml: Buffer Lexing List
+lib/lexer.ml: Buffer Lexing Menhir_parser
