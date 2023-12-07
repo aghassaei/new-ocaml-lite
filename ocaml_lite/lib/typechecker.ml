@@ -1,6 +1,7 @@
 Open Menhir_parser
 (* Open Ast *)
 
+let tmsg = "Typechecker: not implemented yet"
 (* Internally define types for the constraints *)
 type c_type = 
 | CInt                        (* Base types*)
@@ -11,7 +12,7 @@ type c_type =
 | CFun of c_type * c_type
 | CTuple of c_type list
 | CVar of string                (* Variables for types, just indexed by integers *)
-| CForall of int * c_type     (* Quantifiers *)
+| CForall of string * c_type     (* Quantifiers *)
 
 (* 
 (* A constraint is a pair of types *)
@@ -28,9 +29,8 @@ type mapping =
 
 
 let typecheck (bindings : binding list ) : unit = 
-  let map = List.map get_expr_constraints bindings in 
-  (* unify outer mappings *)
-  let _ = unify map in ()
+  let mappings = List.map get_expr_constraints bindings in 
+  let _ = unify map in () (* unify outer mappings *)
 
 
 
@@ -38,21 +38,34 @@ let typecheck (bindings : binding list ) : unit =
 (* unify after every let binding *)
 let get_expr_constraints (b : binding) : mapping = function 
   | NonRecursiveBind(s, pl, t, e) -> 
-        let c = unify (generate_constraint e in (s, c))
+        let c = unify (generate_constraints (e, [])) in Map(s, c)
   | RecursiveBind(s, pl, t, e) -> 
-        let c = unify (generate_constraint e in (s, c))
+        let c = unify (generate_constraints (e, [])) in Map(s, c)
   | TypeBind(s, t_list) ->
-        let c = unify (generate_constraint e in (s, c))
+        let c = unify (generate_constraints (e, [])) in Map(s, c)
 
+
+
+(* constraints specific to binding, environment needs to carry over  *)
 
 (* here when we unify, we unify local mappings *)
 let rec generate_constraints (e : expr ) (context : mapping list ): c_type =
   match e with 
   (* Var *)
-  | IdLit x -> 
+  | IdLit x -> failwith tmsg
 
   (* Abs *)
-  | FunExpr (pl, t, e) -> 
+  | FunExpr (x, t, e) -> CFun(CType t, generate_constraints(e, Map(x CType t) :: context))
+
+  (* App *)
+  FunAppExpr(e1, e2) -> failwith tmsg (*CFun(generate_constraints e1 Map(?), e2 Map(?))*)
+  
+
+  (* Let *)
+
+  (* Inst *)
+
+  (* Gen *)
 
 (* if let appears *)
   | something (e) -> unify ()
@@ -61,7 +74,7 @@ let rec generate_constraints (e : expr ) (context : mapping list ): c_type =
     (* see phone *)
     
 
-
+(* indexing by strings *)
 
 
 
@@ -106,4 +119,18 @@ would be ForAll(0, FunTy (Var 0, Var 0))
 keep track of constraints with refs or monads????? 
 
 
+ *)
+
+
+
+
+
+ (* build these in 
+    
+ 
+ int_of_string : int -> string takes an integer and returns a string representing that integer.
+string_of_int : string -> int takes a string and returns an integer represented by that string. If the given string is not an integer, then this function throws an error.
+print_string : string -> unit takes a string and prints it to stdout (followed by a newline) as a side effect. This is equivalent to the OCaml function print_endline.
+ 
+ 
  *)

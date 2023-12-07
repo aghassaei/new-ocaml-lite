@@ -54,9 +54,9 @@
 
 // Rules 
 %start <binding list> prog  // Start rule: a program as a list of bindings
-%type <binding> Mbinding
-%type <expr> Mexpr
-%type <param> Mparam
+%type <binding> mbinding
+%type <expr> mexpr
+%type <param> mparam
 // like function that takes something, parses, returns something
 
 
@@ -79,41 +79,58 @@
 
 
 
+//   | LetRecInExpr of string * param list * typ option * expr * expr
+//   | LetInExpr of string * param list * typ option * expr * expr
+//   | ConditionExpr of expr * expr * expr 
+//   | FunExpr of param list * typ option * expr 
+//   | FunAppExpr of expr * expr 
+//   | TupleExpr of expr list
+//   | MatchExpr of expr * (string * string list * expr) list
+//   | BExpr of expr * binop * expr 
+//   | UExpr of unop * expr
+//   | IntLit of int
+//   | BoolLit of bool 
+//   | StringLit of string 
+//   | IdLit of string 
+//   | UnitLit
+
+
+
 let prog := 
 | EOF; {[]}     // EOF return empty array
-| b = Mbinding; DoubleSemicolon; p = prog; {b :: p}     // Return a list of bindings
+| b = mbinding; DoubleSemicolon; p = prog; {b :: p}     // Return a list of bindings
 
 
-let Mbinding :=
-| Let; id = Id; params = Mparam*; t = option(Colon; Mtyp); Eq; e = Mexpr; {NonRecursiveBind(id, params, t, e)}
+let mbinding :=
+| Let; id = Id; params = mparam*; t = option(Colon; mtyp); Eq; e = mexpr; {NonRecursiveBind(id, params, t, e)}
 | Let; Rec; id = Id; params = parameter*; t = option(Colon; typ); Eq; e = Mexpr; {RecursiveBind(id, params, t, e)}
-| Type; t = Id; Eq; type_constructors = option(Pipe; Mtypebind_constructor)+; {TypeBind(t, type_constructors)}
+| Type; t = Id; Eq; type_constructors = option(Pipe; mtypebind_constructor)+; {TypeBind(t, type_constructors)}
 
-let Mtypebind_constructor :=
-| id = Id; annotation = option(Of; MType) {TypeBindConstructor(id, annotation)}
+let mtypebind_constructor :=
+| id = Id; annotation = option(Of; mtype); {TypeBindConstructor(id, annotation)}
 
 
-let Mparam :=
+let mparam :=
 | id = Id; {NonAnnotatedParam(id)}
-| LParen; id = Id; Colon; t = Mtyp; RParen; {AnnotatedParam(id, t)}
+| LParen; id = Id; Colon; t = mtyp; RParen; {AnnotatedParam(id, t)}
 
-let Mexpr :=
-| Let; id = Id; params = MParam* t = option(Colon; Mtyp); Eq; e1 = Mexper; In; e2 Mexper; {}
-| Let; Rec; id = Id; params = MParam*, t = option(Colon; MTyp); Eq; e1 = Mexper; In; e2 = Mexper; {}
-| If; e1 = Mexper; Then e2 = Mexper; Else; e3 = Mexper; {}
-| Fun; params = Mparam+; t = option(Colon; MTyp); DoubleArrow; e = Mexper; {}
-| e1 = Mexper, e2 = Mexper; {}
-| LParen; e1 = Mexpr>; e2 = option(Comma, e3 = Mexper)+; RParen; {}
-| e1 = Mexper; b = Mbinop; e2 = Mexper; {}
-| u = Munop; e = Mexper; {}
-| Lparen; e = Mexper; RParen; {}
-| int = Int; {}
-| True; {}
-| False; {}
-| s = String; {}
-| id = Id; {}
-| u = Unit; {}
-| Match; e = Mexper; With; m = option(MMatchbranch)+; {}
+let mexpr :=
+| Let; id = Id; params = mparam*; t = option(Colon; mtyp); Eq; e1 = mexper; In; e2 = mexper; {LetInExpr(id, params, t, e1, e2)}
+| Let; Rec; id = Id; params = mparam*; t = option(Colon; mtyp); Eq; e1 = mexper; In; e2 = mexper; {LetRecInExpr(id, params, t, e1, e2)}
+| If; e1 = mexper; Then; e2 = mexper; Else; e3 = mexper; {ConditionExpr(e1, e2, e3)}
+| Fun; params = mparam+; t = option(Colon; mtyp); DoubleArrow; e = mexper; {FunExpr(params, t, e)}
+| e1 = mexper; e2 = mexper; {FunAppExpr(e1, e2)}
+| LParen; e1 = mexpr; e2 = option(Comma; e3 = mexper)+; RParen; {TupleExpr(e1 :: e2)}
+| e1 = mexper; b = Mbinop; e2 = mexper; {BExpr(e1, b, e2)}
+| u = munop; e = mexper; {UExpr(u, e)}
+| Lparen; e = mexper; RParen; {(TupleExpr(e))}
+| i = Int; {IntLit(i)}
+| True; {BoolLit(true)}
+| False; {BoolLit(false)}
+| s = String; {StringLit s}
+| id = Id; {IdLit id}
+| u = Unit; {UnitLit}
+| Match; e = mexper; With; m = option(MMatchbranch)+; {MatchExpr(e,m)}
 
 
 
@@ -121,7 +138,7 @@ let Mexpr :=
 let type_rule :=
 | EOF; {[]}
 
-let Mbinop := 
+let mbinop := 
 | Plus; {}
 | Minus; {}
 | Div; {}
@@ -136,21 +153,21 @@ let Munop :=
 | Not; {}
 | Tilde; {}
 
-let Mtype :=
-| t1 = Mtype; Arrow; t2 = MType; {}
-| LParen; t = MType; RParen; {}
-| t1 = Mtype; Star; t2 = MType; {}
+let mtype :=
+| t1 = mtype; Arrow; t2 = mtype; {}
+| LParen; t = mtype; RParen; {}
+| t1 = mtype; Star; t2 = mtype; {}
 | TInt; {}
 | TBool; {}
 | TString; {}
 | TUnit; ()
 | s = Id; {}
 
-let Mtype_constructor
+let mtype_constructor
 // with pipes
 
 let MMatchbranch := 
-| id = Id; pv = option(Mpattern_vars); DoubleArrow; e = Mexper; {}
+| id = Id; pv = option(Mpattern_vars); DoubleArrow; e = mexper; {}
 
 let Mpattern_vars := 
 | id = id; {}
