@@ -53,124 +53,113 @@
 
 
 // Rules 
-%start <binding list> prog  // Start rule: a program as a list of bindings
-%type <binding> mbinding
-%type <expr> mexpr
-%type <param> mparam
+// All rules start with an r (for "rule") except the start rule (prog)
+%start <binding list> prog  // Timest rule: a program as a list of bindings
+%type <binding> rBinding     // Parse a binding
+%type <expr> rExpr         // Parse an expression
+%type <param> rParam        // Parse a single parameter, either annotated or nonannotated 
+%type <binop> rBinop        // Parse a binop
+%type <typebind_constructor> rTypebind_constructor      // typebind_constructor parser
+%type <typ> rTyp                  // typ rule
+%type <unop> rUnop                  // unop rule
+%type <expr> rMatchbranch           // match branch rule
+%type <string * string list * expr> rPatternvars
+
 // like function that takes something, parses, returns something
 
+// Associativity and precedence
 
+%nonassoc In
+%nonassoc Else
+%right Arrow
+%right DoubleArrow
 
+// Lowest to highest precedence
+%left Or
+%left And
+%nonassoc Lt, Eq
+%left Plus, Minus, Concat
+%left Times, Divide, Mod
+%nonassoc Negate
+%nonassoc Not 
 
-
-//   types of all rules
-
-
-// associativity
-
-
-
-// precedence 
-
-
-// Start rules
-// begining with M because it's a menhir rule
+// Rules
 %%
 
 
-
-//   | LetRecInExpr of string * param list * typ option * expr * expr
-//   | LetInExpr of string * param list * typ option * expr * expr
-//   | ConditionExpr of expr * expr * expr 
-//   | FunExpr of param list * typ option * expr 
-//   | FunAppExpr of expr * expr 
-//   | TupleExpr of expr list
-//   | MatchExpr of expr * (string * string list * expr) list
-//   | BExpr of expr * binop * expr 
-//   | UExpr of unop * expr
-//   | IntLit of int
-//   | BoolLit of bool 
-//   | StringLit of string 
-//   | IdLit of string 
-//   | UnitLit
-
-
-
 let prog := 
-| EOF; {[]}     // EOF return empty array
-| b = mbinding; DoubleSemicolon; p = prog; {b :: p}     // Return a list of bindings
+| EOF; {[]}     // No more bindings to parse
+| b = rBinding ; DoubleSemicolon; p = prog; {b :: p}     // Return a list of bindings
 
 
-let mbinding :=
-| Let; id = Id; params = mparam*; t = option(Colon; mtyp); Eq; e = mexpr; {NonRecursiveBind(id, params, t, e)}
-| Let; Rec; id = Id; params = parameter*; t = option(Colon; typ); Eq; e = Mexpr; {RecursiveBind(id, params, t, e)}
-| Type; t = Id; Eq; type_constructors = option(Pipe; mtypebind_constructor)+; {TypeBind(t, type_constructors)}
+let rBinding  :=
+| Let; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e = rExpr; {NonRecursiveBind(id, params, t, e)}
+| Let; Rec; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e = rExpr; {RecursiveBind(id, params, t, e)}
+| Type; t = Id; Eq; rTypebind_constructor = option(Pipe; rTypebind_constructor)+; {TypeBind(t, rTypebind_constructor)}
 
-let mtypebind_constructor :=
-| id = Id; annotation = option(Of; mtype); {TypeBindConstructor(id, annotation)}
+let rTypebind_constructor :=
+| id = Id; annotation = option(Of; rType); {TypeBindConstructor(id, annotation)} // Type annotations are optional
 
 
-let mparam :=
+let rParam :=
 | id = Id; {NonAnnotatedParam(id)}
-| LParen; id = Id; Colon; t = mtyp; RParen; {AnnotatedParam(id, t)}
+| LParen; id = Id; Colon; t = rTyp; RParen; {AnnotatedParam(id, t)}
 
-let mexpr :=
-| Let; id = Id; params = mparam*; t = option(Colon; mtyp); Eq; e1 = mexper; In; e2 = mexper; {LetInExpr(id, params, t, e1, e2)}
-| Let; Rec; id = Id; params = mparam*; t = option(Colon; mtyp); Eq; e1 = mexper; In; e2 = mexper; {LetRecInExpr(id, params, t, e1, e2)}
-| If; e1 = mexper; Then; e2 = mexper; Else; e3 = mexper; {ConditionExpr(e1, e2, e3)}
-| Fun; params = mparam+; t = option(Colon; mtyp); DoubleArrow; e = mexper; {FunExpr(params, t, e)}
-| e1 = mexper; e2 = mexper; {FunAppExpr(e1, e2)}
-| LParen; e1 = mexpr; e2 = option(Comma; e3 = mexper)+; RParen; {TupleExpr(e1 :: e2)}
-| e1 = mexper; b = Mbinop; e2 = mexper; {BExpr(e1, b, e2)}
-| u = munop; e = mexper; {UExpr(u, e)}
-| Lparen; e = mexper; RParen; {(TupleExpr(e))}
+
+
+let rExpr:=
+| Let; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e1 = rExpr; In; e2 = rExpr; {LetInExpr(id, params, t, e1, e2)}
+| Let; Rec; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e1 = rExpr; In; e2 = rExpr; {LetRecInExpr(id, params, t, e1, e2)}
+| If; e1 = rExpr; Then; e2 = rExpr; Else; e3 = rExpr; {ConditionExpr(e1, e2, e3)}
+| Fun; params = rParam+; t = option(Colon; rTyp); DoubleArrow; e = rExpr; {FunExpr(params, t, e)}
+| e1 = rExpr; e2 = rExpr; {FunAppExpr(e1, e2)}
+| LParen; e1 = rExpr; e2 = option(Comma; rExpr)+; RParen; {TupleExpr(e1 :: e2)}
+| e1 = rExpr; b = rBinop; e2 = rExpr; {BExpr(e1, b, e2)}
+| u = rUnop; e = rExpr; {UExpr(u, e)}
+| Lparen; e = rExpr; RParen; {(TupleExpr(e))}
 | i = Int; {IntLit(i)}
 | True; {BoolLit(true)}
 | False; {BoolLit(false)}
 | s = String; {StringLit s}
 | id = Id; {IdLit id}
-| u = Unit; {UnitLit}
-| Match; e = mexper; With; m = option(MMatchbranch)+; {MatchExpr(e,m)}
+| LParen; RParen; {UnitLit}
+| Match; e = rExpr; With; m = option(rMatchbranch)+; {MatchExpr(e,m)}
 
 
+let rBinop := 
+| Plus; {AddOp()}
+| Minus; {SubOp()}
+| Divide; {MulOp()}
+| Mod; {ModOp()}
+| Lt; {LtOp()}
+| Eq; {EqOp()}
+| Concat; {ConcatOp()}
+| And; {AndOp()}
+| Or; {OrOp()}
+
+let rUnop := 
+| Not; {NotOp()}
+| Negate; {NegOp()}
+
+let rTyp :=
+| t1 = rType; Arrow; t2 = rType; {FunTy(t1, t2)}
+| LParen; t = rType; RParen; {t}
+| t1 = rType; Times; t2 = rType; {TupTy(t1 :: t2)}
+| TInt; {IntTy()}
+| TBool; {BoolTy()}
+| TString; {StringTy()}
+| TUnit; {UnitTy()}
+| s = Id; {IdTy}
 
 
-let type_rule :=
-| EOF; {[]}
-
-let mbinop := 
-| Plus; {}
-| Minus; {}
-| Div; {}
-| Mod; {}
-| Lt; {}
-| Eq; {}
-| Concat; {}
-| And; {}
-| Or; {}
-
-let Munop := 
-| Not; {}
-| Tilde; {}
-
-let mtype :=
-| t1 = mtype; Arrow; t2 = mtype; {}
-| LParen; t = mtype; RParen; {}
-| t1 = mtype; Star; t2 = mtype; {}
-| TInt; {}
-| TBool; {}
-| TString; {}
-| TUnit; ()
-| s = Id; {}
-
-let mtype_constructor
+// let rType_constructor
 // with pipes
 
-let MMatchbranch := 
-| id = Id; pv = option(Mpattern_vars); DoubleArrow; e = mexper; {}
+let rMatchbranch := 
+| id = Id; pv = option(rPatternvars); DoubleArrow; e = rExpr; {}
 
-let Mpattern_vars := 
-| id = id; {}
-| LParen; id = Id; ids = option(Comma; nested_id = Id)+; RParen; {}
+let rPatternvars := 
+| id = Id; {}
+| LParen; id = Id; ids = option(Comma; Id)+; RParen; {}
 
 

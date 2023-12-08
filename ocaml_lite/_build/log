@@ -4,7 +4,7 @@
 # Workspace root:
 # /Users/aghassaei/Documents/academics/2023/csci384/new-ocaml-lite/ocaml_lite
 # Auto-detected concurrency: 8
-$ /Users/aghassaei/.opam/default/bin/ocamlc.opt -config > /var/folders/wf/k5mwhm8d6ld0ld4ccl14_rk00000gn/T/dune_b36fa7_output
+$ /Users/aghassaei/.opam/default/bin/ocamlc.opt -config > /var/folders/wf/k5mwhm8d6ld0ld4ccl14_rk00000gn/T/dune_0dffe1_output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -101,10 +101,9 @@ $ /Users/aghassaei/.opam/default/bin/ocamlc.opt -config > /var/folders/wf/k5mwhm
 #      }
 #  ; instrument_with = []
 #  }
-$ (cd _build/.sandbox/4a7b79386b26483dc9ea2cec7791db3f/default && /Users/aghassaei/.opam/default/bin/menhir lib/menhir_parser.mly --base lib/menhir_parser --infer-write-query lib/menhir_parser__mock.ml.mock)
-> File "lib/menhir_parser.mly", line 123, characters 52-53:
-> Error: syntax error after 'mexper' and before ')'.
-> A semicolon ';' is expected at this point.
+$ (cd _build/.sandbox/c44808aa885382f9d034f4f60859555c/default && /Users/aghassaei/.opam/default/bin/menhir lib/menhir_parser.mly --base lib/menhir_parser --infer-write-query lib/menhir_parser__mock.ml.mock)
+> File "lib/menhir_parser.mly", line 142, characters 2-7:
+> Error: Tilde is undefined.
 [1]
 $ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamldep.opt -modules -impl lib/typechecker.ml) > _build/default/lib/.ocaml_lite.objs/ocaml_lite__Typechecker.impl.d
 > File "lib/typechecker.ml", line 61, characters 2-12:
