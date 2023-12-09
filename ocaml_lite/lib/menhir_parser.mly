@@ -55,7 +55,7 @@
 %type <typ> rTyp                // Parse type
 %type <unop> rUnop              // Parse unary operator
 %type <branch> rMatchbranch     // Parse match branch
-%type <pattern_var> rPatternvars                       // Parse pattern variables
+%type <pattern_var> rPatternvar                       // Parse pattern variables
 
 
 // ASSOCIATIVITY AND PRECEDENCE (lowest to highest)
@@ -80,26 +80,26 @@ let prog :=
 | b = rBinding ; DoubleSemicolon; p = prog; {b :: p}     // Return a list of bindings
 
 let rBinding  :=
-| Let; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e = rExpr; {NonRecursiveBind(id, params, t, e)}
-| Let; Rec; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e = rExpr; {RecursiveBind(id, params, t, e)}
-| Type; t = Id; Eq; rTypbind_constructor = option(Pipe; rTypbind_constructor)+; {TypeBind(t, rTypbind_constructor)}
+| Let; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e = rExpr; {NonRecursiveBind(id; params; t; e)}
+| Let; Rec; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e = rExpr; {RecursiveBind(id; params; t; e)}
+| Type; t = Id; Eq; rTypbind_constructor = option(Pipe; rTypbind_constructor)+; {TypeBind(t; rTypbind_constructor)}
 
 let rTypbind_constructor :=
-| id = Id; annotation = option(Of; rTyp); {TypeBindConstructor(id, annotation)} // Type annotations are optional
+| id = Id; annotation = option(Of; rTyp); {TypeBindConstructor(id; annotation)} // Type annotations are optional
 
 let rParam :=
 | id = Id; {NonAnnotatedParam(id)}
-| LParen; id = Id; Colon; t = rTyp; RParen; {AnnotatedParam(id, t)}
+| LParen; id = Id; Colon; t = rTyp; RParen; {AnnotatedParam(id; t)}
 
 let rExpr:=
-| Let; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e1 = rExpr; In; e2 = rExpr; {LetInExpr(id, params, t, e1, e2)}
-| Let; Rec; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e1 = rExpr; In; e2 = rExpr; {LetRecInExpr(id, params, t, e1, e2)}
-| If; e1 = rExpr; Then; e2 = rExpr; Else; e3 = rExpr; {ConditionExpr(e1, e2, e3)}
-| Fun; params = rParam+; t = option(Colon; rTyp); DoubleArrow; e = rExpr; {FunExpr(params, t, e)}
-| e1 = rExpr; e2 = rExpr; {FunAppExpr(e1, e2)}
+| Let; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e1 = rExpr; In; e2 = rExpr; {LetInExpr(id; params; t; e1; e2)}
+| Let; Rec; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e1 = rExpr; In; e2 = rExpr; {LetRecInExpr(id; params; t; e1; e2)}
+| If; e1 = rExpr; Then; e2 = rExpr; Else; e3 = rExpr; {ConditionExpr(e1; e2; e3)}
+| Fun; params = rParam+; t = option(Colon; rTyp); DoubleArrow; e = rExpr; {FunExpr(params; t; e)}
+| e1 = rExpr; e2 = rExpr; {FunAppExpr(e1; e2)}
 | LParen; e1 = rExpr; e2 = separated_nonempty_list(Comma, rExpr)+; RParen; {TupleExpr(e1 :: e2)}
-| e1 = rExpr; b = rBinop; e2 = rExpr; {BExpr(e1, b, e2)}
-| u = rUnop; e = rExpr; {UExpr(u, e)}
+| e1 = rExpr; b = rBinop; e2 = rExpr; {BExpr(e1; b; e2)}
+| u = rUnop; e = rExpr; {UExpr(u; e)}
 | LParen; e = rExpr; RParen; {(TupleExpr([e]))}
 | i = Int; {IntLit(i)}
 | True; {BoolLit(true)}
@@ -107,12 +107,24 @@ let rExpr:=
 | s = String; {StringLit s}
 | id = Id; {IdLit id}
 | LParen; RParen; {UnitLit}
-| Match; e = rExpr; With; branches = separated_nonempty_list(Pipe, rMatchbranch); {MatchExpr(e, branches)}
+// | Match; e = rExpr; With; branches = separated_nonempty_list(Pipe, rMatchbranch); {MatchExpr(e, branches)}
+| Match; e = rExpr; With; branches = separated_nonempty_list(Pipe, rMatchbranch); {MatchExpr(e; branches)}
+
+// let rMatchbranch := 
+// // | id = Id; pv = option(rPatternvars); DoubleArrow; e = rExpr; {Branch(id, pv, e)}
+// | id = Id; DoubleArrow; e = expr; {NoVarBranch(id, e)}
+// | id = Id; ids = separated_nonempty_list(Comma, rPatternvars); DoubleArrow; e = expr {VarBranch(id, ids, e)}
+
+// let rPatternvars := 
+// | id = Id; { IdOnly(id) }
+// | LParen; id = Id; ids = separated_nonempty_list(Comma, Id); RParen; {IdAndList(id, ids)}
+
+
 
 let rMatchbranch := 
-| id = Id; pv = option(rPatternvars); DoubleArrow; e = rExpr; {Branch(id, pv, e)}
+| id = Id; pv = option(rPatternvar); DoubleArrow; e = rExpr; {Branch(id, pv, e)}
 
-let rPatternvars := 
+let rPatternvar := 
 | id = Id; { IdOnly(id) }
 | LParen; id = Id; ids = separated_nonempty_list(Comma, Id); RParen; {IdAndList(id, ids)}
 

@@ -1,4 +1,4 @@
-Open Menhir_parser
+open Menhir_parser
 (* Open Ast *)
 
 let tmsg = "Typechecker: not implemented yet"
@@ -58,7 +58,7 @@ let rec generate_constraints (e : expr ) (context : mapping list ): c_type =
   | FunExpr (x, t, e) -> CFun(CType t, generate_constraints(e, Map(x CType t) :: context))
 
   (* App *)
-  FunAppExpr(e1, e2) -> failwith tmsg (*CFun(generate_constraints e1 Map(?), e2 Map(?))*)
+  (* FunAppExpr(e1, e2) -> failwith "error" CFun(generate_constraints e1 Map(?), e2 Map(?)) *)
   
 
   (* Let *)
@@ -68,7 +68,7 @@ let rec generate_constraints (e : expr ) (context : mapping list ): c_type =
   (* Gen *)
 
 (* if let appears *)
-  | something (e) -> unify ()
+  (* | something (e) -> unify () *)
 
 
     (* see phone *)

@@ -24,12 +24,27 @@ and expr =
   | IdLit of string 
   | UnitLit
 
-and branch = 
-  | Branch of string * pattern_var option * expr
+(* and branch = 
+  | Branch of string * pattern_var option * expr *)
 
+
+  (* and branch = 
+  | NoVarBranch of string * expr
+  | VarBranch of string * string list * expr
+(* 
 and pattern_var = 
   | IdOnly of string
-  | IdAndList of string * string list
+  | IdAndList of string * string list *) *)
+
+
+
+
+  and branch = 
+    | Branch of string * pattern_var option * expr
+  
+  and pattern_var = 
+    | IdOnly of string
+    | IdAndList of string * (string list)
 
 and param = 
   | NonAnnotatedParam of string
