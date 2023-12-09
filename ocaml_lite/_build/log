@@ -4,7 +4,7 @@
 # Workspace root:
 # /Users/aghassaei/Documents/academics/2023/csci384/new-ocaml-lite/ocaml_lite
 # Auto-detected concurrency: 8
-$ /Users/aghassaei/.opam/default/bin/ocamlc.opt -config > /var/folders/wf/k5mwhm8d6ld0ld4ccl14_rk00000gn/T/dune_0dffe1_output
+$ /Users/aghassaei/.opam/default/bin/ocamlc.opt -config > /var/folders/wf/k5mwhm8d6ld0ld4ccl14_rk00000gn/T/dune_8c9f9d_output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -101,13 +101,22 @@ $ /Users/aghassaei/.opam/default/bin/ocamlc.opt -config > /var/folders/wf/k5mwhm
 #      }
 #  ; instrument_with = []
 #  }
-$ (cd _build/.sandbox/c44808aa885382f9d034f4f60859555c/default && /Users/aghassaei/.opam/default/bin/menhir lib/menhir_parser.mly --base lib/menhir_parser --infer-write-query lib/menhir_parser__mock.ml.mock)
-> File "lib/menhir_parser.mly", line 142, characters 2-7:
-> Error: Tilde is undefined.
-[1]
+$ (cd _build/.sandbox/1a5bc390c925f67f378047a513e21332/default && /Users/aghassaei/.opam/default/bin/menhir lib/menhir_parser.mly --base lib/menhir_parser --infer-write-query lib/menhir_parser__mock.ml.mock)
+> File "lib/menhir_parser.mly", line 27, characters 7-12:
+> Warning: the token Times is unused.
+$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamldep.opt -modules -impl lib/ast.ml) > _build/default/lib/.ocaml_lite.objs/ocaml_lite__Ast.impl.d
 $ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamldep.opt -modules -impl lib/typechecker.ml) > _build/default/lib/.ocaml_lite.objs/ocaml_lite__Typechecker.impl.d
 > File "lib/typechecker.ml", line 61, characters 2-12:
 > 61 |   FunAppExpr(e1, e2) -> failwith tmsg (*CFun(generate_constraints e1 Map(?), e2 Map(?))*)
 >        ^^^^^^^^^^
 > Error: Syntax error
 [2]
+$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamldep.opt -modules -impl lib/menhir_parser__mock.ml.mock) > _build/default/lib/.ocaml_lite.objs/menhir_parser__mock.impl.d
+$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -bin-annot -I lib/.ocaml_lite.objs/byte -I /Users/aghassaei/.opam/default/lib/base -I /Users/aghassaei/.opam/default/lib/base/base_internalhash_types -I /Users/aghassaei/.opam/default/lib/base/caml -I /Users/aghassaei/.opam/default/lib/base/shadow_stdlib -I /Users/aghassaei/.opam/default/lib/nice_parser -I /Users/aghassaei/.opam/default/lib/ocaml/compiler-libs -I /Users/aghassaei/.opam/default/lib/sexplib0 -I /Users/aghassaei/.opam/default/lib/stdio -no-alias-deps -opaque -open Ocaml_lite -o lib/.ocaml_lite.objs/byte/ocaml_lite__Ast.cmo -c -impl lib/ast.ml)
+$ (cd _build/.sandbox/208ab85d04410fe90581c0688400e25c/default && /Users/aghassaei/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -I lib/.ocaml_lite.objs/byte -I /Users/aghassaei/.opam/default/lib/base -I /Users/aghassaei/.opam/default/lib/base/base_internalhash_types -I /Users/aghassaei/.opam/default/lib/base/caml -I /Users/aghassaei/.opam/default/lib/base/shadow_stdlib -I /Users/aghassaei/.opam/default/lib/nice_parser -I /Users/aghassaei/.opam/default/lib/ocaml/compiler-libs -I /Users/aghassaei/.opam/default/lib/sexplib0 -I /Users/aghassaei/.opam/default/lib/stdio -open Ocaml_lite -short-paths -i -impl lib/menhir_parser__mock.ml.mock) > _build/.sandbox/208ab85d04410fe90581c0688400e25c/default/lib/menhir_parser__mock.mli.inferred
+> File "lib/menhir_parser.mly", line 102, characters 92-94:
+> Error: This expression has type expr list list
+>        but an expression was expected of type expr list
+>        Type expr list is not compatible with type expr
+[2]
+$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -I lib/.ocaml_lite.objs/byte -I lib/.ocaml_lite.objs/native -I /Users/aghassaei/.opam/default/lib/base -I /Users/aghassaei/.opam/default/lib/base/base_internalhash_types -I /Users/aghassaei/.opam/default/lib/base/caml -I /Users/aghassaei/.opam/default/lib/base/shadow_stdlib -I /Users/aghassaei/.opam/default/lib/nice_parser -I /Users/aghassaei/.opam/default/lib/ocaml/compiler-libs -I /Users/aghassaei/.opam/default/lib/sexplib0 -I /Users/aghassaei/.opam/default/lib/stdio -intf-suffix .ml -no-alias-deps -opaque -open Ocaml_lite -o lib/.ocaml_lite.objs/native/ocaml_lite__Ast.cmx -c -impl lib/ast.ml)

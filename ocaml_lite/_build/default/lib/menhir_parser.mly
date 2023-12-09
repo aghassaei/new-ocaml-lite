@@ -1,14 +1,8 @@
-
 %{
-
     open Ast
-    
 %}
 
-
-
-// Tokens
-
+// TOKENS
 %token Type             // type - keyword
 %token Of               // of - keyword
 %token Let              // let - keyword
@@ -47,34 +41,28 @@
 %token Pipe             // |
 %token Comma            // ,
 %token <string> Id      // Identifier, like a variable or function name
-%token <int> Int              // Integer literal
-%token <string> String           // String literal
+%token <int> Int        // Integer literal
+%token <string> String  // String literal
 %token EOF              // End-of-file - you can ignore this
 
+// RULES - all rules start with an r except the start rule (prog)
+%start <binding list> prog      // Start rule: parse a program as a list of bindings
+%type <binding> rBinding        // Parse a binding
+%type <expr> rExpr              // Parse expression
+%type <param> rParam            // Parse single parameter, either annotated or nonannotated 
+%type <binop> rBinop            // Parse binary operators
+%type <typebind_constructor> rTypbind_constructor      // Parse subtypes 
+%type <typ> rTyp                // Parse type
+%type <unop> rUnop              // Parse unary operator
+%type <branch> rMatchbranch     // Parse match branch
+%type <pattern_var> rPatternvars                       // Parse pattern variables
 
-// Rules 
-// All rules start with an r (for "rule") except the start rule (prog)
-%start <binding list> prog  // Timest rule: a program as a list of bindings
-%type <binding> rBinding     // Parse a binding
-%type <expr> rExpr         // Parse an expression
-%type <param> rParam        // Parse a single parameter, either annotated or nonannotated 
-%type <binop> rBinop        // Parse a binop
-%type <typebind_constructor> rTypebind_constructor      // typebind_constructor parser
-%type <typ> rTyp                  // typ rule
-%type <unop> rUnop                  // unop rule
-%type <expr> rMatchbranch           // match branch rule
-%type <string * string list * expr> rPatternvars
 
-// like function that takes something, parses, returns something
-
-// Associativity and precedence
-
+// ASSOCIATIVITY AND PRECEDENCE (lowest to highest)
 %nonassoc In
 %nonassoc Else
 %right Arrow
 %right DoubleArrow
-
-// Lowest to highest precedence
 %left Or
 %left And
 %nonassoc Lt, Eq
@@ -83,7 +71,7 @@
 %nonassoc Negate
 %nonassoc Not 
 
-// Rules
+
 %%
 
 
@@ -95,17 +83,15 @@ let prog :=
 let rBinding  :=
 | Let; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e = rExpr; {NonRecursiveBind(id, params, t, e)}
 | Let; Rec; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e = rExpr; {RecursiveBind(id, params, t, e)}
-| Type; t = Id; Eq; rTypebind_constructor = option(Pipe; rTypebind_constructor)+; {TypeBind(t, rTypebind_constructor)}
+| Type; t = Id; Eq; rTypbind_constructor = option(Pipe; rTypbind_constructor)+; {TypeBind(t, rTypbind_constructor)}
 
-let rTypebind_constructor :=
-| id = Id; annotation = option(Of; rType); {TypeBindConstructor(id, annotation)} // Type annotations are optional
+let rTypbind_constructor :=
+| id = Id; annotation = option(Of; rTyp); {TypeBindConstructor(id, annotation)} // Type annotations are optional
 
 
 let rParam :=
 | id = Id; {NonAnnotatedParam(id)}
 | LParen; id = Id; Colon; t = rTyp; RParen; {AnnotatedParam(id, t)}
-
-
 
 let rExpr:=
 | Let; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e1 = rExpr; In; e2 = rExpr; {LetInExpr(id, params, t, e1, e2)}
@@ -113,53 +99,55 @@ let rExpr:=
 | If; e1 = rExpr; Then; e2 = rExpr; Else; e3 = rExpr; {ConditionExpr(e1, e2, e3)}
 | Fun; params = rParam+; t = option(Colon; rTyp); DoubleArrow; e = rExpr; {FunExpr(params, t, e)}
 | e1 = rExpr; e2 = rExpr; {FunAppExpr(e1, e2)}
-| LParen; e1 = rExpr; e2 = option(Comma; rExpr)+; RParen; {TupleExpr(e1 :: e2)}
+| LParen; e1 = rExpr; e2 = separated_nonempty_list(Comma, rExpr)+; RParen; {TupleExpr(e1 :: e2)}
 | e1 = rExpr; b = rBinop; e2 = rExpr; {BExpr(e1, b, e2)}
 | u = rUnop; e = rExpr; {UExpr(u, e)}
-| Lparen; e = rExpr; RParen; {(TupleExpr(e))}
+| LParen; e = rExpr; RParen; {(TupleExpr([e]))}
 | i = Int; {IntLit(i)}
 | True; {BoolLit(true)}
 | False; {BoolLit(false)}
 | s = String; {StringLit s}
 | id = Id; {IdLit id}
 | LParen; RParen; {UnitLit}
-| Match; e = rExpr; With; m = option(rMatchbranch)+; {MatchExpr(e,m)}
+| Match; e = rExpr; With; branches = separated_nonempty_list(Pipe, rMatchbranch); {MatchExpr(e, branches)}
 
+
+let rMatchbranch := 
+| id = Id; pv = option(rPatternvars); DoubleArrow; e = rExpr; {Branch(id, pv, e)}
+
+let rPatternvars := 
+| id = Id; { IdOnly(id) }
+| LParen; id = Id; ids = separated_nonempty_list(Comma, Id); RParen; {IdAndList(id, ids)}
 
 let rBinop := 
-| Plus; {AddOp()}
-| Minus; {SubOp()}
-| Divide; {MulOp()}
-| Mod; {ModOp()}
-| Lt; {LtOp()}
-| Eq; {EqOp()}
-| Concat; {ConcatOp()}
-| And; {AndOp()}
-| Or; {OrOp()}
+| Plus; {AddOp}
+| Minus; {SubOp}
+| Divide; {MulOp}
+| Mod; {ModOp}
+| Lt; {LtOp}
+| Eq; {EqOp}
+| Concat; {ConcatOp}
+| And; {AndOp}
+| Or; {OrOp}
 
 let rUnop := 
-| Not; {NotOp()}
-| Tilde; {NegOp()}
+| Not; {NotOp}
+| Negate; {NegOp}
 
 let rTyp :=
-| t1 = rType; Arrow; t2 = rType; {FunTy(t1, t2)}
-| LParen; t = rType; RParen; {t}
-| t1 = rType; Times; t2 = rType; {TupTy(t1 :: t2)}
-| TInt; {IntTy()}
-| TBool; {BoolTy()}
-| TString; {StringTy()}
-| TUnit; {UnitTy()}
+| t1 = rTyp; Arrow; t2 = rTyp; {FunTy(t1, t2)}
+| LParen; t = rTyp; RParen; {t}
+// | t1 = rTyp; Times; t2 = rTyp; {TupTy(t1 :: t2)}
+| TInt; {IntTy}
+| TBool; {BoolTy}
+| TString; {StringTy}
+| TUnit; {UnitTy}
 | s = Id; {IdTy}
 
 
-// let rType_constructor
+// let rTyp_constructor
 // with pipes
 
-let rMatchbranch := 
-| id = Id; pv = option(rPatternvars); DoubleArrow; e = rExpr; {}
 
-let rPatternvars := 
-| id = Id; {}
-| LParen; id = Id; ids = option(Comma; Id)+; RParen; {}
 
 

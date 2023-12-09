@@ -1,5 +1,4 @@
 (* AST *)
-(* TypeDefBind to TypeBind *)
 
 type binding = 
   | NonRecursiveBind of string * param list * typ option * expr
@@ -16,7 +15,7 @@ and expr =
   | FunExpr of param list * typ option * expr 
   | FunAppExpr of expr * expr 
   | TupleExpr of expr list
-  | MatchExpr of expr * (string * string list * expr) list
+  | MatchExpr of expr * branch list
   | BExpr of expr * binop * expr 
   | UExpr of unop * expr
   | IntLit of int
@@ -24,6 +23,13 @@ and expr =
   | StringLit of string 
   | IdLit of string 
   | UnitLit
+
+and branch = 
+  | Branch of string * pattern_var option * expr
+
+and pattern_var = 
+  | IdOnly of string
+  | IdAndList of string * string list
 
 and param = 
   | NonAnnotatedParam of string
@@ -36,7 +42,7 @@ and typ =
   | UnitTy
   | IdTy 
   | FunTy of typ * typ
-  | TupTy of typ list
+  (* | TupTy of typ list *)
 
 and unop = 
   | NotOp
