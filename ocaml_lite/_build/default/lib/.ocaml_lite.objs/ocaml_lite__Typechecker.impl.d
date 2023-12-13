@@ -1,1 +1,1 @@
-lib/typechecker.ml: List Menhir_parser
+lib/typechecker.ml:

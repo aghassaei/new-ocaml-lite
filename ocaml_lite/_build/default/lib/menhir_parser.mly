@@ -80,26 +80,27 @@ let prog :=
 | b = rBinding ; DoubleSemicolon; p = prog; {b :: p}     // Return a list of bindings
 
 let rBinding  :=
-| Let; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e = rExpr; {NonRecursiveBind(id; params; t; e)}
-| Let; Rec; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e = rExpr; {RecursiveBind(id; params; t; e)}
-| Type; t = Id; Eq; rTypbind_constructor = option(Pipe; rTypbind_constructor)+; {TypeBind(t; rTypbind_constructor)}
+| Let; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e = rExpr; {NonRecursiveBind(id, params, t, e)}
+| Let; Rec; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e = rExpr; {RecursiveBind(id, params, t, e)}
+| Type; t = Id; Eq; constructors = separated_nonempty_list(Pipe, rTypbind_constructor); {TypeBind(t, constructors)}
 
 let rTypbind_constructor :=
-| id = Id; annotation = option(Of; rTyp); {TypeBindConstructor(id; annotation)} // Type annotations are optional
+| id = Id; annotation = option(Of; rTyp); {TypeBindConstructor(id, annotation)} // Type annotations are optional
 
 let rParam :=
 | id = Id; {NonAnnotatedParam(id)}
-| LParen; id = Id; Colon; t = rTyp; RParen; {AnnotatedParam(id; t)}
+| LParen; id = Id; Colon; t = rTyp; RParen; {AnnotatedParam(id, t)}
 
 let rExpr:=
-| Let; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e1 = rExpr; In; e2 = rExpr; {LetInExpr(id; params; t; e1; e2)}
-| Let; Rec; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e1 = rExpr; In; e2 = rExpr; {LetRecInExpr(id; params; t; e1; e2)}
-| If; e1 = rExpr; Then; e2 = rExpr; Else; e3 = rExpr; {ConditionExpr(e1; e2; e3)}
-| Fun; params = rParam+; t = option(Colon; rTyp); DoubleArrow; e = rExpr; {FunExpr(params; t; e)}
-| e1 = rExpr; e2 = rExpr; {FunAppExpr(e1; e2)}
-| LParen; e1 = rExpr; e2 = separated_nonempty_list(Comma, rExpr)+; RParen; {TupleExpr(e1 :: e2)}
-| e1 = rExpr; b = rBinop; e2 = rExpr; {BExpr(e1; b; e2)}
-| u = rUnop; e = rExpr; {UExpr(u; e)}
+| Let; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e1 = rExpr; In; e2 = rExpr; {LetInExpr(id, params, t, e1, e2)}
+| Let; Rec; id = Id; params = rParam*; t = option(Colon; rTyp); Eq; e1 = rExpr; In; e2 = rExpr; {LetRecInExpr(id, params, t, e1, e2)}
+| If; e1 = rExpr; Then; e2 = rExpr; Else; e3 = rExpr; {ConditionExpr(e1, e2, e3)}
+| Fun; params = rParam+; t = option(Colon; rTyp); DoubleArrow; e = rExpr; {FunExpr(params, t, e)}
+| e1 = rExpr; e2 = rExpr; {FunAppExpr(e1, e2)}
+// | LParen; e1 = rExpr; e2 = separated_nonempty_list(Comma, rExpr)+; RParen; {TupleExpr(e1 :: e2)}
+// This expression has type expr list list but an expression was expected of type expr list. Type expr list is not compatible with type expr
+| e1 = rExpr; b = rBinop; e2 = rExpr; {BExpr(e1, b, e2)}
+| u = rUnop; e = rExpr; {UExpr(u, e)}
 | LParen; e = rExpr; RParen; {(TupleExpr([e]))}
 | i = Int; {IntLit(i)}
 | True; {BoolLit(true)}
@@ -108,7 +109,7 @@ let rExpr:=
 | id = Id; {IdLit id}
 | LParen; RParen; {UnitLit}
 // | Match; e = rExpr; With; branches = separated_nonempty_list(Pipe, rMatchbranch); {MatchExpr(e, branches)}
-| Match; e = rExpr; With; branches = separated_nonempty_list(Pipe, rMatchbranch); {MatchExpr(e; branches)}
+| Match; e = rExpr; With; branches = separated_nonempty_list(Pipe, rMatchbranch); {MatchExpr(e, branches)}
 
 // let rMatchbranch := 
 // // | id = Id; pv = option(rPatternvars); DoubleArrow; e = rExpr; {Branch(id, pv, e)}

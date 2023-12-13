@@ -1,2 +1,3 @@
 ocaml_lite__Ast
 ocaml_lite__Lexer
+ocaml_lite__Menhir_parser

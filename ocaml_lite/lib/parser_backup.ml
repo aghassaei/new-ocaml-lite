@@ -1,4 +1,4 @@
-open Lexer
+(* open Lexer
 open Ast
 
 let msg = "not implemented yet"
@@ -185,4 +185,4 @@ let parse (src : token list) : binding list =
   match parse_binding src with 
    | (b, []) -> [b]
    | (_, t :: _) -> failwith ("Expected end of input but got '" ^ tok_to_str t ^"'" ) 
- 
+  *)

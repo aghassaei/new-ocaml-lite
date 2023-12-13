@@ -1,0 +1,73 @@
+type token =
+    With
+  | Type
+  | True
+  | Times
+  | Then
+  | TUnit
+  | TString
+  | TInt
+  | TBool
+  | String of string
+  | Rec
+  | RParen
+  | Plus
+  | Pipe
+  | Or
+  | Of
+  | Not
+  | Negate
+  | Mod
+  | Minus
+  | Match
+  | Lt
+  | Let
+  | LParen
+  | Int of int
+  | In
+  | If
+  | Id of string
+  | Fun
+  | False
+  | Eq
+  | Else
+  | EOF
+  | DoubleSemicolon
+  | DoubleArrow
+  | Divide
+  | Concat
+  | Comma
+  | Colon
+  | Arrow
+  | And
+val menhir_begin_marker : int
+val xv_separated_nonempty_list_Pipe_rTypbind_constructor_ :
+  Ast.typebind_constructor list
+val xv_separated_nonempty_list_Pipe_rMatchbranch_ : Ast.branch list
+val xv_separated_nonempty_list_Comma_Id_ : string list
+val xv_rUnop : Ast.unop
+val xv_rTypbind_constructor : Ast.typebind_constructor
+val xv_rTyp : Ast.typ
+val xv_rPatternvar : Ast.pattern_var
+val xv_rParam : Ast.param
+val xv_rMatchbranch : Ast.branch
+val xv_rExpr : Ast.expr
+val xv_rBinop : Ast.binop
+val xv_rBinding : Ast.binding
+val xv_prog : Ast.binding list
+val xv_option_rPatternvar_ : Ast.pattern_var option
+val xv_option___anonymous_5_ : Ast.typ option
+val xv_option___anonymous_4_ : Ast.typ option
+val xv_option___anonymous_3_ : Ast.typ option
+val xv_option___anonymous_2_ : Ast.typ option
+val xv_option___anonymous_1_ : Ast.typ option
+val xv_option___anonymous_0_ : Ast.typ option
+val xv_nonempty_list_rParam_ : Ast.param list
+val xv_list_rParam_ : Ast.param list
+val xv___anonymous_5 : Ast.typ
+val xv___anonymous_4 : Ast.typ
+val xv___anonymous_3 : Ast.typ
+val xv___anonymous_2 : Ast.typ
+val xv___anonymous_1 : Ast.typ
+val xv___anonymous_0 : Ast.typ
+val menhir_end_marker : int
