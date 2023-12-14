@@ -97,8 +97,7 @@ let rExpr:=
 | If; e1 = rExpr; Then; e2 = rExpr; Else; e3 = rExpr; {ConditionExpr(e1, e2, e3)}
 | Fun; params = rParam+; t = option(Colon; rTyp); DoubleArrow; e = rExpr; {FunExpr(params, t, e)}
 | e1 = rExpr; e2 = rExpr; {FunAppExpr(e1, e2)}
-// | LParen; e1 = rExpr; e2 = separated_nonempty_list(Comma, rExpr)+; RParen; {TupleExpr(e1 :: e2)}
-// This expression has type expr list list but an expression was expected of type expr list. Type expr list is not compatible with type expr
+// | LParen; e1 = rExpr; e2 = separated_nonempty_list(Comma, rExpr)+; RParen; {TupleExpr(e1 :: e2)} NOTE: commented out to avoid the error "This expression has type expr list list but an expression was expected of type expr list. Type expr list is not compatible with type expr"
 | e1 = rExpr; b = rBinop; e2 = rExpr; {BExpr(e1, b, e2)}
 | u = rUnop; e = rExpr; {UExpr(u, e)}
 | LParen; e = rExpr; RParen; {(TupleExpr([e]))}
@@ -108,19 +107,7 @@ let rExpr:=
 | s = String; {StringLit s}
 | id = Id; {IdLit id}
 | LParen; RParen; {UnitLit}
-// | Match; e = rExpr; With; branches = separated_nonempty_list(Pipe, rMatchbranch); {MatchExpr(e, branches)}
 | Match; e = rExpr; With; branches = separated_nonempty_list(Pipe, rMatchbranch); {MatchExpr(e, branches)}
-
-// let rMatchbranch := 
-// // | id = Id; pv = option(rPatternvars); DoubleArrow; e = rExpr; {Branch(id, pv, e)}
-// | id = Id; DoubleArrow; e = expr; {NoVarBranch(id, e)}
-// | id = Id; ids = separated_nonempty_list(Comma, rPatternvars); DoubleArrow; e = expr {VarBranch(id, ids, e)}
-
-// let rPatternvars := 
-// | id = Id; { IdOnly(id) }
-// | LParen; id = Id; ids = separated_nonempty_list(Comma, Id); RParen; {IdAndList(id, ids)}
-
-
 
 let rMatchbranch := 
 | id = Id; pv = option(rPatternvar); DoubleArrow; e = rExpr; {Branch(id, pv, e)}
@@ -147,7 +134,7 @@ let rUnop :=
 let rTyp :=
 | t1 = rTyp; Arrow; t2 = rTyp; {FunTy(t1, t2)}
 | LParen; t = rTyp; RParen; {t}
-// | t1 = rTyp; Times; t2 = rTyp; {TupTy(t1 :: t2)}
+// | t1 = rTyp; Times; t2 = rTyp; {TupTy(t1 :: t2)} NOTE: commented out to avoid errors, not right
 | TInt; {IntTy}
 | TBool; {BoolTy}
 | TString; {StringTy}
@@ -155,7 +142,6 @@ let rTyp :=
 | s = Id; {IdTy}
 
 
-// let rTyp_constructor
 
 
 

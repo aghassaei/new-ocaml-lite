@@ -4,7 +4,7 @@
 # Workspace root:
 # /Users/aghassaei/Documents/academics/2023/csci384/new-ocaml-lite/ocaml_lite
 # Auto-detected concurrency: 8
-$ /Users/aghassaei/.opam/default/bin/ocamlc.opt -config > /var/folders/wf/k5mwhm8d6ld0ld4ccl14_rk00000gn/T/dune_6ad4cf_output
+$ /Users/aghassaei/.opam/default/bin/ocamlc.opt -config > /var/folders/wf/k5mwhm8d6ld0ld4ccl14_rk00000gn/T/dune_2c77c7_output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -102,17 +102,42 @@ $ /Users/aghassaei/.opam/default/bin/ocamlc.opt -config > /var/folders/wf/k5mwhm
 #  ; instrument_with = []
 #  }
 $ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamldep.opt -modules -impl lib/typechecker.ml) > _build/default/lib/.ocaml_lite.objs/ocaml_lite__Typechecker.impl.d
-> File "lib/typechecker.ml", line 121, characters 0-1:
-> 121 | )
->       ^
-> Error: Syntax error
-[2]
-$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -bin-annot -I lib/.ocaml_lite.objs/byte -I /Users/aghassaei/.opam/default/lib/base -I /Users/aghassaei/.opam/default/lib/base/base_internalhash_types -I /Users/aghassaei/.opam/default/lib/base/caml -I /Users/aghassaei/.opam/default/lib/base/shadow_stdlib -I /Users/aghassaei/.opam/default/lib/nice_parser -I /Users/aghassaei/.opam/default/lib/ocaml/compiler-libs -I /Users/aghassaei/.opam/default/lib/sexplib0 -I /Users/aghassaei/.opam/default/lib/stdio -no-alias-deps -opaque -open Ocaml_lite -o lib/.ocaml_lite.objs/byte/ocaml_lite__Interpreter.cmo -c -impl lib/interpreter.ml)
-> File "lib/interpreter.ml", lines 72-74, characters 57-65:
-> 72 | .........................................................: environment = 
-> 73 |     match br with 
-> 74 |     | Branch (s, pv, e) -> interpret pattern vars, interpret expr
-> Error: This expression has type 'a * 'b
->        but an expression was expected of type
->          environment = (string * value) list
+$ (cd _build/default && /Users/aghassaei/.opam/default/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -warn-error -A -g -bin-annot -I lib/.ocaml_lite.objs/byte -I /Users/aghassaei/.opam/default/lib/base -I /Users/aghassaei/.opam/default/lib/base/base_internalhash_types -I /Users/aghassaei/.opam/default/lib/base/caml -I /Users/aghassaei/.opam/default/lib/base/shadow_stdlib -I /Users/aghassaei/.opam/default/lib/nice_parser -I /Users/aghassaei/.opam/default/lib/ocaml/compiler-libs -I /Users/aghassaei/.opam/default/lib/sexplib0 -I /Users/aghassaei/.opam/default/lib/stdio -no-alias-deps -opaque -open Ocaml_lite -o lib/.ocaml_lite.objs/byte/ocaml_lite__Typechecker.cmo -c -impl lib/typechecker.ml)
+> File "lib/typechecker.ml", lines 66-67, characters 2-12:
+> 66 | ..match consts with
+> 67 |   | [] -> []
+> Warning 8 [partial-match]: this pattern-matching is not exhaustive.
+> Here is an example of a case that is not matched:
+> _::_
+>
+> File "lib/typechecker.ml", line 65, characters 8-13:
+> 65 | let rec unify (consts : const list) : const list = 
+>              ^^^^^
+> Warning 39 [unused-rec-flag]: unused rec flag.
+>
+> File "lib/typechecker.ml", lines 100-114, characters 0-148:
+> 100 | match c with 
+> 101 | (* If two variables, map one to the other *)
+> 102 | | SingleConstraint(CVar t1, CVar t2) -> [c]
+> 103 | 
+> 104 | (* If first is a variable *)
+> ...
+> 111 | (* | SingleConstraint(CTuple l1, CTuple l2) -> List.map2 unify l1 l2 *)
+> 112 | 
+> 113 | (* base types *)
+> 114 | | SingleConstraint(x, y) -> if x = y then [c] else failwith ("Types " ^ (ctype_to_string x) ^ " and " ^ (ctype_to_string y) ^ " cannot be unified.")
+> Warning 8 [partial-match]: this pattern-matching is not exhaustive.
+> Here is an example of a case that is not matched:
+> (Ident|NewConstrs _|Map (_, _))
+>
+> File "lib/typechecker.ml", lines 134-140, characters 56-59:
+> 134 | ........................................................: const list = function 
+> 135 |   | NonRecursiveBind(s, pl, t, e) -> 
+> 136 |         let c = unify (typecheck_expr (e, [])) in Map(s, c)
+> 137 |   | RecursiveBind(s, pl, t, e) -> 
+> 138 |         let c = unify (typecheck_expr (e, [])) in Map(s, c)
+> 139 |   | TypeBind(s, t_list) ->
+> 140 |         let c = unify (typecheck_expr (e, [])) in Map(s, c)
+> Error: This expression has type 'a -> 'b
+>        but an expression was expected of type const list
 [2]

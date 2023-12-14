@@ -1,1 +1,1 @@
-lib/interpreter.ml: Ast List Parser
+lib/interpreter.ml: Ast List Parser Typechecker

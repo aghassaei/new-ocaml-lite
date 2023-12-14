@@ -1,10 +1,7 @@
 open Menhir_parser
-(* Open Ast *)
+open Ast
 
 let tmsg = "Typechecker: not implemented yet"
-
-(* scopes *)
-
 
 (* type to build constraints *)
 type c_type = 
@@ -31,41 +28,110 @@ type const =
    a named variable may be associated with the c_type CVar i, then i gets mapped to some other c_type. *)
 type context = (string * c_type) list
 
+
+let rec join (l : string list) : string = 
+  match l with
+  | [] -> ""
+  | h :: t -> h ^ (join t)
+
+
 (* Printer function for internal constraint types *)
-let ctype_to_string (c : c_type) : string = function 
+let rec ctype_to_string (c : c_type) : string = 
+  match c with  
   | CInt -> "int"
   | CBool -> "bool"
   | CString -> "string"
   | CUnit -> "unit"             
   | CUser s -> s (* user defined types are already strings*)
-  | CFun(a, b) -> "fun " ^ ctype_to_string a ^ " -> " ctype_to_string b 
-  | CTuple(l) -> (
-      match l with 
+  | CFun(a, b) -> "fun " ^ (ctype_to_string a) ^ " -> " ^ (ctype_to_string b)
+  | CTuple(l) -> join (List.map ctype_to_string l)
+  | CVar s -> "CVar " ^ string_of_int s
+  | CForall(s, c) -> "forall " ^ s ^ ": " ^ (ctype_to_string c)
+
+
+
+      (* (match l with 
       | [] -> ""
-      | h :: t -> ctype_to_string h ^ ";" ^ctype_to_string t
-  )
-  | CVar s -> s
-  | CForall(s, c) -> "forall " ^ s ^ ": "^ ctype_to_string c
-
-
-
-
+      | h :: t -> (ctype_to_string h) ^ ";" ^ (ctype_to_string t)
+  ) *)
 
 (* Takes AST and throws error if typechecking fails, returns unit otherwise *)
 
 
-let typecheck (bindings : binding list ) : unit = 
-  (* Get constraints from all bindings *)
-  let constraints = List.map get_expr_constraints bindings in 
 
-  (* Unify those constraints *)
-  let _ = unify constraints in () (* unify outer mappings *)
 
+
+(* Takes a system of constraints and returns a unified list of constraints *)
+let rec unify (consts : const list) : const list = 
+  match consts with
+  | [] -> []
+(* | SingleConstraint(t1, t2) :: rest -> let reduction = reduce t1 t2  *)
+(* | c :: rest -> let reduction = reduce c in ( *)
+  (* redutions can only have a few forms *)
+  (* match reduction with  *)
+  (* | trivial constraint ('x = 'x, int = int, etc) -> Ident
+  | function type -> break into new constraints
+  | type variable = t where variable does not appear in t ->
+      replace variable with t, getting rid of variable
+      add substitution t/variable to solution
+  else, fail  *)
+(* ) *)
+(* options: 1. update solution with new substitutions, add new constraints to consts, or fail *)
+
+
+
+(* | Map(t1, t2) :: t -> let new_constr = unify_single_constraints Map(t1, t2) in (
+  unify (new_constr :: m)
+) *)
+
+
+
+
+
+
+
+
+
+
+
+
+
+let unify_single_constraint (c: const) : const list = 
+match c with 
+(* If two variables, map one to the other *)
+| SingleConstraint(CVar t1, CVar t2) -> [c]
+
+(* If first is a variable *)
+(* | Map(CVar t1, c) -> m *) (* for rest with variables, just return m?*)
+
+(* function
+| SingleConstraint(CFun(a1, b1), CFun (a1, b2)) -> [unify Map(a1, a2) :: unify Map(b1, b2)] *)
+
+(* tuple *)
+(* | SingleConstraint(CTuple l1, CTuple l2) -> List.map2 unify l1 l2 *)
+
+(* base types *)
+| SingleConstraint(x, y) -> if x = y then [c] else failwith ("Types " ^ (ctype_to_string x) ^ " and " ^ (ctype_to_string y) ^ " cannot be unified.")
+
+
+(* let solve_single ( c : constr ) : constr list = function 
+(* If t1 is a variable *)
+match c with 
+| (CVar t1, t2) -> 
+    (match t2 with 
+    | CVar -> (t1, t2)) (* should be if t1=t2 then do nothing, else arbitrarily map one to the other *)
+
+(* If both are function types *)
+| (CFun f1, CFun f2) ->  *)
+
+(* substitution: sequence of smaller substitutions, carried out in order *)
+(* S unifies a constrain t1 ~ t2 if t1 S = t2 S *)
+  (* a substitution S unifies a set of constraints if it unifies all the constraints in the set *)
 
 
 (* find expression in b, generate constraints for expressions, return pair of what it's bound to and constraints *)
 (* unify after every let binding *)
-let rec typecheck_binding (b : binding) (ctx : context) : 'c = function 
+let rec typecheck_binding (b : binding) (ctx : context) : const list = function 
   | NonRecursiveBind(s, pl, t, e) -> 
         let c = unify (typecheck_expr (e, [])) in Map(s, c)
   | RecursiveBind(s, pl, t, e) -> 
@@ -81,7 +147,7 @@ let rec typecheck_binding (b : binding) (ctx : context) : 'c = function
 (* given some context and expression, generate a type for that expression with constraints, then (in different function probably) run unifi
    cation on constraint set  to get a substitution sequence S (your solution), apply the substitution to type, so the 
    final inferred type is t with S applied*)
-and typecheck_expr (e : expr) (ctx : context ) : (c_type * c_type) list =
+and typecheck_expr (e : expr) (ctx : context ) : const list =
   match e with 
 (* match for all types of expressions in the AST *)
   | LetRecInExpr(s, pl, t, e1, e2) -> failwith tmsg (* return constraints from e1 and e2, when gettting constraints pass Map(name, t) into context*)
@@ -101,75 +167,14 @@ and typecheck_expr (e : expr) (ctx : context ) : (c_type * c_type) list =
 
   and typecheck_matchbranch (b : branch) (ctx : context) : 'c = failwith tmsg
 
-
-
-
-
-(* Takes a system of constraints and returns a unified list of constraints *)
-let rec unify (consts : const list) : solution = function 
-| [] -> []
-(* | SingleConstraint(t1, t2) :: rest -> let reduction = reduce t1 t2  *)
-(* | c :: rest -> let reduction = reduce c in ( *)
-  (* redutions can only have a few forms *)
-  (* match reduction with  *)
-  (* | trivial constraint ('x = 'x, int = int, etc) -> Ident
-  | function type -> break into new constraints
-  | type variable = t where variable does not appear in t ->
-      replace variable with t, getting rid of variable
-      add substitution t/variable to solution
-  else, fail  *)
-)
-(* options: 1. update solution with new substitutions, add new constraints to consts, or fail *)
-
-
-
-(* | Map(t1, t2) :: t -> let new_constr = unify_single_constraints Map(t1, t2) in (
-  unify (new_constr :: m)
-) *)
-
-
-
 (*  *)
+let typecheck (bindings : binding list ) : unit = 
+  (* Get constraints from all bindings *)
+  let constraints = List.map typecheck_binding bindings in 
 
+  (* Unify those constraints *)
+  let _ = unify constraints in () (* unify outer mappings *)
 
-
-
-
-
-
-
-
-
-let unify_single_constraint (m: map) : mapping list = function 
-(* If two variables, map one to the other *)
-| Map(CVar t1, CVar t2) -> [m]
-
-(* If first is a variable *)
-(* | Map(CVar t1, c) -> m *) (* for rest with variables, just return m?*)
-
-(* function *)
-| Map(CFun(a1, b1), CFun (a1, b2)) -> [unify Map(a1, a2) :: unify Map(b1, b2)]
-
-(* tuple *)
-| Map(CTuple l1, CTuple l2) -> List.map2 unify l1 l2
-
-(* base types *)
-| Map(x, y) -> if x = y then [m] else failwith "Types " ^ ctype_to_string x ^ " and " ^ ctype_to_string y " cannot be unified."
-
-
-(* let solve_single ( c : constr ) : constr list = function 
-(* If t1 is a variable *)
-match c with 
-| (CVar t1, t2) -> 
-    (match t2 with 
-    | CVar -> (t1, t2)) (* should be if t1=t2 then do nothing, else arbitrarily map one to the other *)
-
-(* If both are function types *)
-| (CFun f1, CFun f2) ->  *)
-
-(* substitution: sequence of smaller substitutions, carried out in order *)
-(* S unifies a constrain t1 ~ t2 if t1 S = t2 S *)
-  (* a substitution S unifies a set of constraints if it unifies all the constraints in the set *)
 
 (* notes
    

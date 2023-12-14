@@ -1,71 +1,99 @@
 open Menhir_parser
-(* Open Ast *)
+open Ast
 
+(* My main issue with the typechecker was figuring out how to fit the pieces together *)
+
+(* Placeholder for unfinished branches *)
 let tmsg = "Typechecker: not implemented yet"
-
-(* scopes *)
-
 
 (* type to build constraints *)
 type c_type = 
-| CInt                         (* Base types*)
+(* Base types *)
+| CInt                         
 | CBool   
 | CString
 | CUnit                       
-| CUser of string              (* Types from source code*)
+| CUser of string 
+(* Types from source code *)             
 | CFun of c_type * c_type
 | CTuple of c_type list
-| CVar of int                  (* Variables for types, just indexed by integers *)
-| CForall of string * c_type   (* Quantifiers *)
+(* Variables for types, indexed by integers *)
+| CVar of int   
+(* Quantifiers *)         
+| CForall of string * c_type   
 
-
-(* A constraint. May be one of three types *)
-(* Had the idea to structure things this way from Sam *)
+(* Type for constraints, which may be one of four types. Idea to have subtypes of constraints from Sam *)
 type const = 
-| Ident   (* t1 ~ t1 *)
+| Ident                                (* t1 ~ t1 *)
 | NewConstrs of (c_type * c_type) list (* t1 ~ t2; t3 ~ int, etc*)
-| Map of int * c_type  (* t1 |-> int *)
-| SingleConstraint of c_type * c_type
+| Map of int * c_type                  (* t1 |-> int *)
+| SingleConstraint of c_type * c_type  (* NOTE: idea here was to have a type to match a single constraint with in unify_single_constraint. Probably not actually necessary since I could just pattern match on a constr list with one element *)
 
-(* A context is what you are given when you are typechecking an expression. The reason that it is string * c_type is so that 
-   a named variable may be associated with the c_type CVar i, then i gets mapped to some other c_type. *)
+(* A context is what you are given when you are typechecking an expression. 
+The reason that it is string * c_type is so that a named variable may be associated with the c_type CVar i, then i gets mapped to some other c_type (also an idea from Sam). *)
 type context = (string * c_type) list
 
-(* Printer function for internal constraint types *)
-let ctype_to_string (c : c_type) : string = function 
+(* Helper function to flatten a string list into a single string *)
+let rec join (l : string list) (sep : string) : string = 
+  match l with
+  | [] -> ""
+  | h :: t -> h ^ sep ^ (join t)
+
+(* Print function for internal constraint types *)
+let rec ctype_to_string (c : c_type) : string = 
+  match c with  
   | CInt -> "int"
   | CBool -> "bool"
   | CString -> "string"
   | CUnit -> "unit"             
   | CUser s -> s (* user defined types are already strings*)
-  | CFun(a, b) -> "fun " ^ ctype_to_string a ^ " -> " ctype_to_string b 
-  | CTuple(l) -> (
-      match l with 
-      | [] -> ""
-      | h :: t -> ctype_to_string h ^ ";" ^ctype_to_string t
-  )
-  | CVar s -> s
-  | CForall(s, c) -> "forall " ^ s ^ ": "^ ctype_to_string c
+  | CFun(a, b) -> "fun " ^ (ctype_to_string a) ^ " -> " ^ (ctype_to_string b)
+  | CTuple(l) -> "[" ^ (join ((List.map ctype_to_string l) ";")) ^ "]"
+  | CVar s -> "CVar " ^ string_of_int s
+  | CForall(s, c) -> "forall " ^ s ^ ": " ^ (ctype_to_string c)
 
 
 
+(* TYPECHECKER *)
+(* Takes a program (list of bindings) and returns unit if it passes (fails otherwise) *)
 
 
-(* Takes AST and throws error if typechecking fails, returns unit otherwise *)
+(* Unify a system of constraints: takes constraint list and return list with modifications to make it unified *)
+let rec unify (consts : const list) : const list = 
+  match consts with
+  | [] -> []
+  | SingleConstraint(t1, t2) :: rest -> failwith tmsg (* Something along the lines of let reduction = reduce t1 t2 in... *)
+  (* pseudo code for after you get the reduced form of a constraint
+     match reduction with 
+     | a trivial constraint (ex: 'x = 'x, int = int) -> do nothing (Ident) 
+     | function type (f * g) -> break apart into new constraints  (NewConstrs [(a1, a2);(b1, b2)])
+     | type variable in need of substitution -> 
+          1. replace variable with t, getting rid of variable
+          2.  add substitution t/variable to solution 
+     | _ -> failwith "No more forms of the reduction" *)
+  
+(* Solve a single constraint - I didn't know how to incorporate this into the function above *)
+let unify_single_constraint (c: const) : const list = 
+match c with 
+(* If two variables, map one to the other *)
+| SingleConstraint(CVar t1, CVar t2) -> [c]
 
+(* If first is a variable *)
+(* | Map(CVar t1, c) -> m *) (* for rest with variables, just return m?*)
 
-let typecheck (bindings : binding list ) : unit = 
-  (* Get constraints from all bindings *)
-  let constraints = List.map get_expr_constraints bindings in 
+(* function
+| SingleConstraint(CFun(a1, b1), CFun (a1, b2)) -> [unify Map(a1, a2) :: unify Map(b1, b2)] *)
 
-  (* Unify those constraints *)
-  let _ = unify constraints in () (* unify outer mappings *)
+(* tuple *)
+(* | SingleConstraint(CTuple l1, CTuple l2) -> List.map2 unify l1 l2 *)
 
+(* base types *)
+| SingleConstraint(x, y) -> if x = y then [c] else failwith ("Types " ^ (ctype_to_string x) ^ " and " ^ (ctype_to_string y) ^ " cannot be unified.")
 
 
 (* find expression in b, generate constraints for expressions, return pair of what it's bound to and constraints *)
 (* unify after every let binding *)
-let rec typecheck_binding (b : binding) (ctx : context) : 'c = function 
+let rec typecheck_binding (b : binding) (ctx : context) : const list = function 
   | NonRecursiveBind(s, pl, t, e) -> 
         let c = unify (typecheck_expr (e, [])) in Map(s, c)
   | RecursiveBind(s, pl, t, e) -> 
@@ -74,14 +102,10 @@ let rec typecheck_binding (b : binding) (ctx : context) : 'c = function
         let c = unify (typecheck_expr (e, [])) in Map(s, c)
 
 
-
-(* constraints specific to binding, environment needs to carry over  *)
-
-(* here when we unify, we unify local mappings *)
 (* given some context and expression, generate a type for that expression with constraints, then (in different function probably) run unifi
    cation on constraint set  to get a substitution sequence S (your solution), apply the substitution to type, so the 
    final inferred type is t with S applied*)
-and typecheck_expr (e : expr) (ctx : context ) : (c_type * c_type) list =
+and typecheck_expr (e : expr) (ctx : context ) : const list =
   match e with 
 (* match for all types of expressions in the AST *)
   | LetRecInExpr(s, pl, t, e1, e2) -> failwith tmsg (* return constraints from e1 and e2, when gettting constraints pass Map(name, t) into context*)
@@ -101,131 +125,11 @@ and typecheck_expr (e : expr) (ctx : context ) : (c_type * c_type) list =
 
   and typecheck_matchbranch (b : branch) (ctx : context) : 'c = failwith tmsg
 
+(* Base function *)
+let typecheck (bindings : binding list ) : unit = 
+  (* Get constraints from all bindings *)
+  let constraints = List.map typecheck_binding bindings in 
 
+  (* Unify those constraints *)
+  let _ = unify constraints in () (* unify outer mappings *)
 
-
-
-(* Takes a system of constraints and returns a unified list of constraints *)
-let rec unify (consts : const list) : solution = function 
-| [] -> []
-(* | SingleConstraint(t1, t2) :: rest -> let reduction = reduce t1 t2  *)
-(* | c :: rest -> let reduction = reduce c in ( *)
-  (* redutions can only have a few forms *)
-  (* match reduction with  *)
-  (* | trivial constraint ('x = 'x, int = int, etc) -> Ident
-  | function type -> break into new constraints
-  | type variable = t where variable does not appear in t ->
-      replace variable with t, getting rid of variable
-      add substitution t/variable to solution
-  else, fail  *)
-(* ) *)
-(* options: 1. update solution with new substitutions, add new constraints to consts, or fail *)
-
-
-
-(* | Map(t1, t2) :: t -> let new_constr = unify_single_constraints Map(t1, t2) in (
-  unify (new_constr :: m)
-) *)
-
-
-
-(*  *)
-
-
-
-
-
-
-
-
-
-
-let unify_single_constraint (m: map) : mapping list = function 
-(* If two variables, map one to the other *)
-| Map(CVar t1, CVar t2) -> [m]
-
-(* If first is a variable *)
-(* | Map(CVar t1, c) -> m *) (* for rest with variables, just return m?*)
-
-(* function *)
-| Map(CFun(a1, b1), CFun (a1, b2)) -> [unify Map(a1, a2) :: unify Map(b1, b2)]
-
-(* tuple *)
-| Map(CTuple l1, CTuple l2) -> List.map2 unify l1 l2
-
-(* base types *)
-| Map(x, y) -> if x = y then [m] else failwith "Types " ^ ctype_to_string x ^ " and " ^ ctype_to_string y " cannot be unified."
-
-
-(* let solve_single ( c : constr ) : constr list = function 
-(* If t1 is a variable *)
-match c with 
-| (CVar t1, t2) -> 
-    (match t2 with 
-    | CVar -> (t1, t2)) (* should be if t1=t2 then do nothing, else arbitrarily map one to the other *)
-
-(* If both are function types *)
-| (CFun f1, CFun f2) ->  *)
-
-(* substitution: sequence of smaller substitutions, carried out in order *)
-(* S unifies a constrain t1 ~ t2 if t1 S = t2 S *)
-  (* a substitution S unifies a set of constraints if it unifies all the constraints in the set *)
-
-(* notes
-   
-
-have constraint system
-
-t0 -> t1 ~ int ->t2        (FunTy (Var 0, Var 1)       FunTy (Var Int, Var 2))
-
-t2 ~ bool                   (Var 2, Bool)
-
-
-Then follow unification algorithm (on Moodle page)
-
-
-
-
-
-ex: forall t0. t0 -> t0
-
-would be ForAll(0, FunTy (Var 0, Var 0))
-
-keep track of constraints with refs or monads????? 
-
-
- *)
-
-
-
-
-
- (* build these in 
-    
- 
- int_of_string : int -> string takes an integer and returns a string representing that integer.
-string_of_int : string -> int takes a string and returns an integer represented by that string. If the given string is not an integer, then this function throws an error.
-print_string : string -> unit takes a string and prints it to stdout (followed by a newline) as a side effect. This is equivalent to the OCaml function print_endline.
- 
- 
- *)
-
-
-
-
-
-  (* Var *)
-  (* | IdLit x -> failwith tmsg *)
-
-  (* Abs *)
-  (* | FunExpr (x, t, e) -> CFun(CType t, generate_constraints(e, Map(x CType t) :: context)) *)
-
-  (* App *)
-  (* FunAppExpr(e1, e2) -> failwith "error" CFun(generate_constraints e1 Map(?), e2 Map(?)) *)
-  
-
-  (* Let *)
-
-  (* Inst *)
-
-  (* Gen *)
